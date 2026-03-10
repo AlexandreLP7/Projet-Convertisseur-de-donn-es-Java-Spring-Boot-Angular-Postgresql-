@@ -1,0 +1,78 @@
+<div class="main-container">
+  <mat-card class="converter-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>currency_exchange</mat-icon> Convertisseur de Devises
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Montant</mat-label>
+          <input matInput type="number" [(ngModel)]="amount">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>De (Départ)</mat-label>
+          <mat-select [(ngModel)]="fromCurrency">
+            <mat-select-trigger>
+              <img [src]="getFlagUrl(fromCurrency)" width="20" style="margin-right: 10px; vertical-align: middle;">
+              {{ fromCurrency }}
+            </mat-select-trigger>
+            <mat-option *ngFor="let curr of currencies" [value]="curr">
+              <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
+              {{ curr }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Vers (Cible)</mat-label>
+          <mat-select [(ngModel)]="targetCurrency">
+            <mat-select-trigger>
+              <img [src]="getFlagUrl(targetCurrency)" width="20" style="margin-right: 10px; vertical-align: middle;">
+              {{ targetCurrency }}
+            </mat-select-trigger>
+            <mat-option *ngFor="let curr of currencies" [value]="curr">
+              <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
+              {{ curr }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <button mat-raised-button color="primary" (click)="onConvert()" class="full-width">
+        CONVERTIR MAINTENANT
+      </button>
+
+      @if (result != null) {
+        <div class="result-box">
+          <p>Résultat :</p>
+          <h2>{{ result | number:'1.2-2' }} {{ targetCurrency }}</h2>
+      </div>
+      }
+      
+      <mat-divider></mat-divider>
+
+      <div class="history-section">
+        <h3><mat-icon>history</mat-icon> Dernières conversions (Sauvegardées)</h3>
+        <mat-list shadow>
+          <mat-list-item *ngFor="let item of history">
+            <img [src]="getFlagUrl(item.toCurrency)" matListItemIcon width="25" style="border-radius: 2px;">
+            
+            <div matListItemTitle>
+              <strong>{{ item.amount }} {{ item.fromCurrency }}</strong> 
+              <mat-icon style="font-size: 14px; height: 14px; width: 14px; vertical-align: middle;">arrow_forward</mat-icon>
+              <strong>{{ item.result | number:'1.2-2' }} {{ item.toCurrency }}</strong>
+            </div>
+
+            <div matListItemLine style="color: gray; font-size: 0.75rem;">
+              Le {{ item.date | date:'dd/MM/yyyy à HH:mm' }}
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
