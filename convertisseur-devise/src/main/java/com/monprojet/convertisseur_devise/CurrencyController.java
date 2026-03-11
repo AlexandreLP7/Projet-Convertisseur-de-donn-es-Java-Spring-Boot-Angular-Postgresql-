@@ -23,7 +23,7 @@ public class CurrencyController {
     @GetMapping("/convert")
     public double convert(
         @RequestParam double amount, 
-        @RequestParam String fromCurrency, // Nouvelle variable
+        @RequestParam String fromCurrency,
         @RequestParam String toCurrency) {
         
         // On change l'URL pour que la base soit dynamique
