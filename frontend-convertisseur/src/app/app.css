@@ -56,3 +56,80 @@ mat-list-item:last-child {
 [matListItemIcon] {
   margin-right: 15px !important;
 }
+
+button[mat-icon-button] {
+  display: block;
+  margin: 0 auto;
+}
+
+/* MODE SOMBRE */
+.dark-mode {
+  background-color: #121212;
+}
+
+.dark-mode .converter-card {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+.dark-mode .result-box {
+  background-color: #1b5e20;
+  color: #a5d6a7;
+}
+
+.dark-mode mat-list-item {
+  border-bottom: 1px solid #333;
+  color: #ffffff;
+}
+
+.dark-mode .history-section h3 {
+  color: #ffffff;
+}
+
+.dark-mode mat-form-field {
+  color: #ffffff;
+}
+
+.dark-mode .mat-mdc-list-item-title,
+.dark-mode .mat-mdc-list-item-line,
+.dark-mode .mdc-list-item__primary-text,
+.dark-mode strong,
+.dark-mode span {
+  color: #ffffff !important;
+}
+
+.dark-mode .mat-mdc-input-element {
+  color: #ffffff !important;
+}
+
+.dark-mode .mat-mdc-select-value {
+  color: #ffffff !important;
+}
+
+.dark-mode label {
+  color: #aaaaaa !important;
+}
+
+.page-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.chart-card {
+  width: 500px;
+  padding: 10px;
+}
+
+.chart-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* Dark mode graphique */
+.dark-mode .chart-card {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
