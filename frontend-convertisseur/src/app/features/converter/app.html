@@ -25,10 +25,12 @@
                 <img [src]="getFlagUrl(fromCurrency)" width="20" style="margin-right: 10px; vertical-align: middle;">
                 {{ fromCurrency }}
               </mat-select-trigger>
-              <mat-option *ngFor="let curr of currencies" [value]="curr">
-                <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
-                {{ curr }}
-              </mat-option>
+              @for (curr of currencies; track curr) {
+                <mat-option [value]="curr">
+                  <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
+                  {{ curr }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
 
@@ -44,15 +46,17 @@
                 <img [src]="getFlagUrl(targetCurrency)" width="20" style="margin-right: 10px; vertical-align: middle;">
                 {{ targetCurrency }}
               </mat-select-trigger>
-              <mat-option *ngFor="let curr of currencies" [value]="curr">
-                <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
-                {{ curr }}
-              </mat-option>
+              @for (curr of currencies; track curr) {
+                <mat-option [value]="curr">
+                  <img [src]="getFlagUrl(curr)" width="20" style="margin-right: 10px; vertical-align: middle;">
+                  {{ curr }}
+                </mat-option>
+              } 
             </mat-select>
           </mat-form-field>
         </div>
 
-        <button mat-raised-button color="primary" (click)="onConvert()" class="full-width">
+        <button mat-raised-button color="primary" (click)="onConvert()" class="full-width" [disabled]="!amount || amount <= 0">
           CONVERTIR MAINTENANT
         </button>
 
@@ -71,20 +75,22 @@
         <div class="history-section">
           <h3><mat-icon>history</mat-icon> Dernières conversions (Sauvegardées)</h3>
           <mat-list shadow>
-            <mat-list-item *ngFor="let item of history">
-              
-              <div matListItemTitle style="display: flex; align-items: center;">
-                <img [src]="getFlagUrl(item.fromCurrency)" matListItemIcon width="25" style="border-radius: 2px; margin-top: 6px; vertical-align: middle; margin-left: 10px;">
-                <strong>{{ item.amount }} {{ item.fromCurrency }}</strong> 
-                <mat-icon style="font-size: 14px; height: 14px; width: 14px;">arrow_forward</mat-icon>
-                <strong>{{ item.result | number:'1.2-2' }} {{ item.toCurrency }}</strong>
-                <img [src]="getFlagUrl(item.toCurrency)" width="25" style="border-radius: 2px; margin-left: 14px;">
-              </div>
+            @for (item of history; track item.id) {
+              <mat-list-item>
+                
+                <div matListItemTitle style="display: flex; align-items: center;">
+                  <img [src]="getFlagUrl(item.fromCurrency)" matListItemIcon width="25" style="border-radius: 2px; margin-top: 6px; vertical-align: middle; margin-left: 10px;">
+                  <strong>{{ item.amount }} {{ item.fromCurrency }}</strong> 
+                  <mat-icon style="font-size: 14px; height: 14px; width: 14px;">arrow_forward</mat-icon>
+                  <strong>{{ item.result | number:'1.2-2' }} {{ item.toCurrency }}</strong>
+                  <img [src]="getFlagUrl(item.toCurrency)" width="25" style="border-radius: 2px; margin-left: 14px;">
+                </div>
 
-              <div matListItemLine style="color: gray; font-size: 0.75rem; margin-top: 15px;">
-                Le {{ item.date | date:'dd/MM/yyyy à HH:mm' }}
-              </div>
-            </mat-list-item>
+                <div matListItemLine style="color: gray; font-size: 0.75rem; margin-top: 15px;">
+                  Le {{ item.date | date:'dd/MM/yyyy à HH:mm' }}
+                </div>
+              </mat-list-item>
+            }
           </mat-list>
         </div>
       </mat-card-content>

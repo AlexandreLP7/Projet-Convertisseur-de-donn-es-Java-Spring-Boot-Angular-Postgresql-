@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CurrencyService } from './currency'; 
+import { CurrencyService } from '../../core/services/currency.service'; 
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -11,8 +11,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables } from 'chart.js';
+import { Conversion } from '../../models/conversion.model';
+
+// Register Chart.js components globally
 Chart.register(...registerables);
 
+/**
+ * Main component of the application.
+ * Manages the conversion UI logic, history updates, and data visualization.
+ */
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -32,10 +39,20 @@ Chart.register(...registerables);
   styleUrl: './app.css'
 })
 export class AppComponent implements OnInit {
+
+  // Input fields and result values
   amount: number = 1;
   targetCurrency: string = 'USD';
+  fromCurrency: string = 'EUR';
   result: number | null = null;
-  history: any[] = [];
+  rate: number | null = null;
+
+  // UI State management
+  history: Conversion[] = [];
+  errorMessage: string | null = null;
+  isDarkMode: boolean = false;
+
+  // List of supported currency codes
   currencies = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY', 'MAD', 'DZD',
   'TND', 'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AWG', 'AZN',
   'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BRL',
@@ -53,18 +70,16 @@ export class AppComponent implements OnInit {
   'TOP', 'TRY', 'TTD', 'TVD', 'TWD', 'TZS', 'UAH', 'UGX', 'UYU', 'UZS',
   'VES', 'VND', 'VUV', 'WST', 'XAF', 'XCD', 'XDR', 'XOF', 'XPF', 'YER',
   'ZAR', 'ZMW', 'ZWL'];
-  fromCurrency: string = 'EUR'; // Par défaut
 
+  // Mapping for flag display
   currencyToCountry: { [key: string]: string } = {
     'EUR': 'eu', 'USD': 'us', 'GBP': 'gb', 'JPY': 'jp', 'MAD': 'ma',
     'DZD': 'dz', 'TND': 'tn', 'CAD': 'ca', 'AUD': 'au', 'CHF': 'ch',
     'CNY': 'cn', 'BRL': 'br', 'INR': 'in', 'RUB': 'ru', 'TRY': 'tr'
   };
 
-  isDarkMode: boolean = false;
 
-  rate: number | null = null;
-
+  // Chart configuration
   chartDays: number = 7;
   chartLabels: string[] = [];
   chartDatasets: any[] = [{ data: [], label: 'Taux' }];
@@ -79,66 +94,100 @@ export class AppComponent implements OnInit {
 
   constructor(private currencyService: CurrencyService, private cdr: ChangeDetectorRef) {}
 
-  // Se lance automatiquement à l'ouverture de l'appli
+  /**
+   * Initialization lifecycle hook.
+   * Loads initial history and sorts the currency list.
+   */
   ngOnInit() {
     this.refreshHistory();
     this.currencies.sort();
   }
 
+  /**
+   * Triggers the conversion process and updates the view.
+   */
   onConvert() {
-  this.currencyService.getConversion(this.amount, this.fromCurrency, this.targetCurrency).subscribe({
-    next: (data) => {
-      this.result = data;
-      this.rate = data / this.amount; // ← calcul du taux unitaire
-      this.cdr.detectChanges();
-      this.refreshHistory();
-      this.loadChart();
+    this.errorMessage = null;
+
+    if (!this.amount || this.amount <= 0) {
+        this.errorMessage = "Veuillez entrer un montant valide";
+        return; 
     }
-  });
+
+    this.currencyService.getConversion(this.amount, this.fromCurrency, this.targetCurrency).subscribe({
+      next: (data) => {
+        this.result = data;
+        this.rate = data / this.amount;
+        this.cdr.detectChanges();
+        this.refreshHistory();
+        this.loadChart();
+      },
+      error: (err) => {
+          this.errorMessage = err.message; 
+      }
+    });
+
   }
 
+  /**
+   * Refreshes the conversion history list from the backend.
+   */
   refreshHistory() {
-      this.currencyService.getHistory().subscribe({
+    this.currencyService.getHistory().subscribe({
         next: (historyData) => {
-          this.history = historyData;
+            this.history = historyData;
         },
-        error: (err) => console.error("Impossible de charger l'historique", err)
-      });
+        error: (err) => {
+            this.errorMessage = err.message;
+        }
+    });
   }
 
+  /**
+   * Generates the URL for the flag image based on the currency code.
+   * @param currency The currency code (e.g., 'USD').
+   */
   getFlagUrl(currency: string): string {
     // On récupère le code pays, sinon on prend les 2 premières lettres de la devise
     const countryCode = this.currencyToCountry[currency] || currency.substring(0, 2).toLowerCase();
     return `https://flagcdn.com/w40/${countryCode}.png`;
   }
 
+  /**
+   * Swaps the source and target currencies.
+   */
   swapCurrencies() {
     const temp = this.fromCurrency;
     this.fromCurrency = this.targetCurrency;
     this.targetCurrency = temp;
-    this.result = null; // remet le résultat à zéro
+    this.result = null; 
   }
 
+  /**
+   * Toggles between light and dark theme modes.
+   */
   toggleDarkMode() {
     this.isDarkMode = !this.isDarkMode;
   }
 
+  /**
+   * Loads historical rate data for the trend chart.
+   */
   loadChart() {
     this.currencyService.getHistoricalRates(this.fromCurrency, this.targetCurrency, this.chartDays).subscribe({
-      next: (data) => {
-        this.chartLabels = Object.keys(data.rates);
-        this.chartDatasets = [{
-          data: this.chartLabels.map(date => data.rates[date][this.targetCurrency]),
-          label: `${this.fromCurrency} → ${this.targetCurrency}`,
-          borderColor: '#4caf50',
-          backgroundColor: 'rgba(76, 175, 80, 0.1)',
-          fill: true,
-          tension: 0.4
-        }];
-        this.cdr.detectChanges();
-      }
+        next: (data) => {
+            this.chartLabels = Object.keys(data.rates);
+            this.chartDatasets = [{
+                data: this.chartLabels.map(date => data.rates[date][this.targetCurrency]),
+                // ...
+            }];
+            this.cdr.detectChanges();
+        },
+        error: (err) => {
+            this.errorMessage = err.message;
+        }
     });
-  }
+}
 
 
 
